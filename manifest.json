@@ -1,0 +1,41 @@
+{
+  "manifest_version": 2,
+  "name": "Persistent-Pretty-JSON",
+  "version": "1.3",
+  "author": "Philippe Pitz Clairoux && J-F Poirier",
+
+  "description": "Let's you write query selectors on web pages to pretty-fi json payloads persistently.",
+
+   "browser_action": {
+      "default_icon": "icon/JSONPrettier-48.png",
+      "default_popup": "popup/host-management.html"
+    },
+
+  "icons": {
+    "48": "icon/JSONPrettier-48.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [ "content_scripts/pretty.js" ]
+    }
+  ],
+
+  "background" : {
+    "scripts" : [ "background_scripts/background.js" ]
+  },
+
+  "permissions" : [
+    "activeTab",
+    "<all_urls>",
+    "cookies"
+  ],
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pitp2601@usherbrooke.ca",
+      "strict_min_version": "57.0"
+    }
+  }
+}

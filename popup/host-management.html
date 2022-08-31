@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+  <meta http-equiv="Content-Security-Policy"
+      content="default-src 'unsafe-inline'; img-src https://*">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Settings!</title>
+  </head>
+  <body>
+    <header></header>
+
+    <main>
+      <h3>Settings : </h3>
+      <form>
+
+        <label for="selector">selector:</label><br>
+        <input type="text" id="selector" name="selector" value='[id="value!"]'><br><br>
+
+        <input type="button" id="send" value="Save selector for current tab!">
+      </form>
+      <br>
+      <br>
+      <br>
+
+      <table >
+        <thead>
+        <tr>
+          <th>Host</th>
+          <th>selector</th>
+        </tr>
+        </thead>
+        <tbody id="rows">
+          <tr id="example">
+            <td id="_url">URL_CHANGEME</td>
+            <td id="_selector">URL_CHANGEME</td>
+          </tr>
+        </tbody>
+      </table>
+    <script type="text/javascript" src="read-write-storage.js"></script>
+    </main>
+    <footer></footer>
+  </body>
+</html>

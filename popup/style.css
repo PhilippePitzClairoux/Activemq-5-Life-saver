@@ -1,0 +1,22 @@
+#example {
+    visibility: hidden;
+}
+
+body {
+ background-color: black;
+ color: #1aff00;
+ text-align: center;
+  -webkit-text-stroke: 0.5px #04cef2;
+}
+
+input {
+  background-color: #4f4f4f;
+  color: white;
+
+}
+
+input[type=button] {
+  border-color: red;
+  font-weight: bold;
+   color: #1aff00;
+}
