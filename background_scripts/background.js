@@ -8,6 +8,7 @@ function getActiveTab() {
 
 function sendEvent() {
     getActiveTab().then((tabs) => {
+        console.log(tabs)
         let url = new URL(tabs[0].url);
 
         // get any previously set cookie for the current tab
