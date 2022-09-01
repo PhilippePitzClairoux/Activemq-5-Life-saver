@@ -2,6 +2,15 @@ const settings_name = "Persistent-Pretty-JSON.settings";
 const row_example = document.getElementById("example");
 const table = document.getElementById("rows");
 
+//load urls every time this script is called
+getUrls();
+
+//add event for button "send"
+document.getElementById("send").addEventListener('click', (event) => {
+    writeUrl();
+});
+
+
 function getActiveTab() {
   return browser.tabs.query({active: true, currentWindow: true});
 }
@@ -52,9 +61,3 @@ function addObjectToTable(url, selector) {
     table.appendChild(new_node);
 
 }
-
-document.getElementById("send").addEventListener('click', (event) => {
-        writeUrl();
-});
-
-getUrls();
