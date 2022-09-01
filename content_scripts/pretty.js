@@ -8,7 +8,7 @@ function parse(request, sender, sendResponse) {
 
     if (payload) {
         if (payload.innerText.startsWith("<")) {
-            formatXml(payload, false, 4);
+            formatXml(payload, 4);
         } else {
             //json
             stringifyJson(payload);
@@ -22,11 +22,11 @@ function stringifyJson(json) {
     json.innerText = JSON.stringify(obj, null, 4);
 }
 
-function formatXml(node,colorize,indent) {
+function formatXml(node, indent) {
     console.log("Parsing XML!")
     let xml = node.innerText;
 
-    node.innerText = parseXml(xml, 4);
+    node.innerText = parseXml(xml, indent);
 }
 
 //https://github.com/vkiryukhin/vkBeautify/blob/master/vkbeautify.js
