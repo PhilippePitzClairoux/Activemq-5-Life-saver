@@ -30,7 +30,7 @@ async function parse(request, sender, sendResponse) {
                         let destination = EXTRACT_DESTINATION.exec(window.location.href)[1];
                         // fetch entity id
                         tableChild.children[j].children[1].innerHTML =
-                            await fetchField("entityId", messageId, destination);;
+                            await fetchField("entityId", messageId, destination);
                     }
 
                 }
@@ -44,11 +44,9 @@ async function fetchField(fieldName, messageId, destination) {
     // replace browse.jsp for message.jsp
     // call message.jsp?id=MESSAGE_ID&JMSDestination=JMS_DESTINATION
     let url = new URL(window.location.protocol + "//" + window.location.host + `/admin/message.jsp?id=${messageId}&JMSDestination=${destination}`);
-    console.log(url);
     const response = await fetch(url);
     const payload = new window.DOMParser().parseFromString(await response.text(), "text/html");
     // get all td's and parse itterate on them to find entityId
-    console.log('extract field value...')
     return payload.evaluate('//table[@id=\'properties\']/tbody/tr/td[text() = "entityId"]/following-sibling::td[1]',
         payload,
         null,

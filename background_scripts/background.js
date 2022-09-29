@@ -20,6 +20,8 @@ function sendEvent() {
         gettingCookies.then((cookie) => {
         if (cookie) {
             browser.tabs.sendMessage(tabs[0].id, { selector : cookie.value });
+        } else {
+          browser.tabs.sendMessage(tabs[0].id, null);
         }
         });
     });
