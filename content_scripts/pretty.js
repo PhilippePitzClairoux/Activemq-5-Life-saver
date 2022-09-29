@@ -1,10 +1,12 @@
 browser.runtime.onMessage.addListener(parse);
 
+const EXTRACT_DESTINATION = /JMSDestination=([\w|.\-]{5,})/
 
-function parse(request, sender, sendResponse) {
+async function parse(request, sender, sendResponse) {
     // Execute function when page is loaded and ready
     // let json = document.querySelector(request.selector);
     let payload = document.querySelector(request.selector);
+    let table = document.querySelector('table#messages');
 
     if (payload) {
         if (payload.innerText.startsWith("<")) {
@@ -14,6 +16,51 @@ function parse(request, sender, sendResponse) {
             stringifyJson(payload);
         }
     }
+
+    if (table && window.location.href.includes('browse.jsp')) {
+        for (let i = 0; i < table.children.length; i++) {
+
+            if (table.children[i].nodeType === Node.ELEMENT_NODE) {
+                let tableChild = table.children[i];
+
+                if (tableChild.localName === 'tbody') {
+                    for (let j = 0; j < tableChild.children.length; j++) {
+                        // we have every row of the table with tableChild.children[j]
+                        let messageId = tableChild.children[j].children[0].firstElementChild.innerHTML;
+                        let destination = EXTRACT_DESTINATION.exec(window.location.href)[1];
+                        // fetch entity id
+                        tableChild.children[j].children[1].innerHTML =
+                            await fetchField("entityId", messageId, destination);;
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+async function fetchField(fieldName, messageId, destination) {
+    // extract JMSDestination
+    // replace browse.jsp for message.jsp
+    // call message.jsp?id=MESSAGE_ID&JMSDestination=JMS_DESTINATION
+    let url = new URL(window.location.protocol + "//" + window.location.host + `/admin/message.jsp?id=${messageId}&JMSDestination=${destination}`);
+    console.log(url);
+    const response = await fetch(url);
+    const payload = new window.DOMParser().parseFromString(await response.text(), "text/html");
+    // get all td's and parse itterate on them to find entityId
+    console.log('extract field value...')
+    return payload.evaluate('//table[@id=\'properties\']/tbody/tr/td[text() = "entityId"]/following-sibling::td[1]',
+        payload,
+        null,
+        XPathResult.ANY_TYPE,
+        null)
+    .iterateNext()
+        .innerText;
+    //return value of entityId
+}
+
+function modifyNodeValues(node, toReplace, value) {
+
 }
 
 // function stringifyJson(request, sender, sendResponse) {
