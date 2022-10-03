@@ -1,6 +1,6 @@
 browser.runtime.onMessage.addListener(parse);
 
-const EXTRACT_DESTINATION = /JMSDestination=([\w|.\-]{5,})/
+const EXTRACT_DESTINATION = /JMSDestination=([\w|.\-]{5,})/;
 
 async function parse(request, sender, sendResponse) {
     // Execute function when page is loaded and ready
@@ -18,21 +18,22 @@ async function parse(request, sender, sendResponse) {
     }
 
     if (table && window.location.href.includes('browse.jsp')) {
-        for (let i = 0; i < table.children.length; i++) {
+        loadCorrelationId(table);
+    }
+}
 
-            if (table.children[i].nodeType === Node.ELEMENT_NODE) {
-                let tableChild = table.children[i];
+async function loadCorrelationId(table) {
+    for (let i = 0; i < table.children.length; i++) {
 
-                if (tableChild.localName === 'tbody') {
-                    for (let j = 0; j < tableChild.children.length; j++) {
-                        // we have every row of the table with tableChild.children[j]
-                        let messageId = tableChild.children[j].children[0].firstElementChild.innerHTML;
-                        let destination = EXTRACT_DESTINATION.exec(window.location.href)[1];
-                        // fetch entity id
-                        tableChild.children[j].children[1].innerHTML =
-                            await fetchField("entityId", messageId, destination);
-                    }
+        if (table.children[i].nodeType === Node.ELEMENT_NODE) {
+            let tableChild = table.children[i];
 
+            if (tableChild.localName === 'tbody') {
+                for (let j = 0; j < tableChild.children.length; j++) {
+                    let messageId = tableChild.children[j].children[0].firstElementChild.innerHTML;
+                    let destination = EXTRACT_DESTINATION.exec(window.location.href)[1];
+                    tableChild.children[j].children[1].innerHTML =
+                        await fetchField("entityId", messageId, destination);
                 }
             }
         }
@@ -55,10 +56,6 @@ async function fetchField(fieldName, messageId, destination) {
     .iterateNext()
         .innerText;
     //return value of entityId
-}
-
-function modifyNodeValues(node, toReplace, value) {
-
 }
 
 // function stringifyJson(request, sender, sendResponse) {

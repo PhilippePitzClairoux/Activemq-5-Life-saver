@@ -1,6 +1,29 @@
 const settings_name = "Persistent-Pretty-JSON.settings";
-const row_example = document.getElementById("example");
+// query selector
+const row = document.getElementById("example");
 const table = document.getElementById("rows");
+
+const Settings = {
+    SELECTOR : "selector",
+    FIELD : "field"
+}
+
+
+// settings map
+settings_map = {
+    "selector" : {
+        row : row,
+        table : table,
+        ref : undefined
+    },
+
+    "field" : {
+        row : row,
+        table : table,
+        ref : undefined
+    }
+}
+
 
 //load urls every time this script is called
 getUrls();
@@ -26,8 +49,13 @@ function getUrls() {
         });
         gettingCookies.then((cookie) => {
             if (cookie) {
-                addObjectToTable(actual_url, cookie.value);
-                browser.tabs.sendMessage(tabs[0].id, { selector: cookie.value});
+                addObjectToTable(actual_url, cookie.selector, Settings.SELECTOR);
+                addObjectToTable(actual_url, cookie.field, Settings.FIELD);
+                
+                settings_map[Settings.SELECTOR].ref.value = cookie.selector;
+                settings_map[Settings.FIELD].ref.value = cookie.field;
+
+                browser.tabs.sendMessage(tabs[0].id, { selector: cookie.selector, field : cookie.field });
             }
         });
     });
@@ -35,29 +63,40 @@ function getUrls() {
 
 function writeUrl() {
     let selector = document.getElementsByName("selector")[0].value;
+    let field = document.getElementsByName("field")[0].value;
+    let host = document.getElementById("host");
 
     getActiveTab().then((tabs) => {
         let url = new URL(tabs[0].url);
-        browser.tabs.sendMessage(tabs[0].id, { selector: selector });
-        addObjectToTable("https://" + url.host, selector);
+        browser.tabs.sendMessage(tabs[0].id, { selector: selector, field : field });
+        
+        addObjectToTable(Settings.SELECTOR, selector, Settings.SELECTOR);
+        addObjectToTable(Settings.FIELD, field, Settings.FIELD);
+        host.innerText = "https://" + url.host;
 
         browser.cookies.set({
             url: "https://" + url.host,
             name: settings_name,
-            value: selector
+            selector: selector,
+            field : field
         });
      });
 
 }
 
-function addObjectToTable(url, selector) {
-    let new_node = row_example.cloneNode(true);
+function addObjectToTable(url, value, settings) {
+    let new_node = settings_map[settings].row.cloneNode(true);
+    let table = settings_map[settings].table;
 
     new_node.childNodes[1].innerText = url;
-    new_node.childNodes[3].innerText = selector;
+    new_node.childNodes[3].innerText = value;
     new_node.removeAttribute('id');
 
-    table.removeChild(table.lastChild);
+    if (settings_map[settings].ref) {
+        settings_map[settings].ref.remove();
+    }
+
     table.appendChild(new_node);
 
+    settings_map[settings].ref = new_node;
 }
