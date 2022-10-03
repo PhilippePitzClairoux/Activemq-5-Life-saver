@@ -41,7 +41,8 @@ function getActiveTab() {
 function getUrls() {
     getActiveTab().then((tabs) => {
         let url = new URL(tabs[0].url);
-        let actual_url = "https://" + url.host;
+        let actual_url = `https://${url.host}`;
+
         // get any previously set cookie for the current tab
         let gettingCookies = browser.cookies.get({
             url: actual_url,
@@ -51,9 +52,6 @@ function getUrls() {
             if (cookie) {
                 addObjectToTable(actual_url, cookie.selector, Settings.SELECTOR);
                 addObjectToTable(actual_url, cookie.field, Settings.FIELD);
-                
-                settings_map[Settings.SELECTOR].ref.value = cookie.selector;
-                settings_map[Settings.FIELD].ref.value = cookie.field;
 
                 browser.tabs.sendMessage(tabs[0].id, { selector: cookie.selector, field : cookie.field });
             }
@@ -72,7 +70,7 @@ function writeUrl() {
         
         addObjectToTable(Settings.SELECTOR, selector, Settings.SELECTOR);
         addObjectToTable(Settings.FIELD, field, Settings.FIELD);
-        host.innerText = "https://" + url.host;
+        host.innerText = `https://${url.host}`;
 
         browser.cookies.set({
             url: "https://" + url.host,
@@ -88,6 +86,8 @@ function addObjectToTable(url, value, settings) {
     let new_node = settings_map[settings].row.cloneNode(true);
     let table = settings_map[settings].table;
 
+    console.log(settings);
+
     new_node.childNodes[1].innerText = url;
     new_node.childNodes[3].innerText = value;
     new_node.removeAttribute('id');
@@ -97,6 +97,5 @@ function addObjectToTable(url, value, settings) {
     }
 
     table.appendChild(new_node);
-
     settings_map[settings].ref = new_node;
 }
