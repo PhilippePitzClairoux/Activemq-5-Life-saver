@@ -1,8 +1,16 @@
+// cookie name
 const settings_name = "Persistent-Pretty-JSON.settings";
-// query selector
+
+// display properties selectors
 const row = document.getElementById("example");
 const table = document.getElementById("rows");
 
+// form selectors
+let selector = document.getElementById("selector");
+let field = document.getElementById("field");
+const host = document.getElementById("host");
+
+// settings
 const Settings = {
     SELECTOR : "selector",
     FIELD : "field"
@@ -50,45 +58,46 @@ function getUrls() {
         });
         gettingCookies.then((cookie) => {
             if (cookie) {
-                addObjectToTable(actual_url, cookie.selector, Settings.SELECTOR);
-                addObjectToTable(actual_url, cookie.field, Settings.FIELD);
+                const cookieValue = JSON.parse(cookie.value);
+                addObjectToTable(cookieValue.selector, Settings.SELECTOR);
+                addObjectToTable(cookieValue.field, Settings.FIELD);
+                host.innerText = `https://${url.host}`;
 
-                browser.tabs.sendMessage(tabs[0].id, { selector: cookie.selector, field : cookie.field });
+                selector.value = cookieValue.selector;
+                field.value = cookieValue.field;
+
+                browser.tabs.sendMessage(tabs[0].id, JSON.parse(cookie.value));
             }
         });
     });
 }
 
 function writeUrl() {
-    let selector = document.getElementsByName("selector")[0].value;
-    let field = document.getElementsByName("field")[0].value;
-    let host = document.getElementById("host");
 
     getActiveTab().then((tabs) => {
         let url = new URL(tabs[0].url);
-        browser.tabs.sendMessage(tabs[0].id, { selector: selector, field : field });
+        browser.tabs.sendMessage(tabs[0].id, { selector: selector.value, field : field.value });
         
-        addObjectToTable(Settings.SELECTOR, selector, Settings.SELECTOR);
-        addObjectToTable(Settings.FIELD, field, Settings.FIELD);
+        addObjectToTable(selector.value, Settings.SELECTOR);
+        addObjectToTable(field.value, Settings.FIELD);
         host.innerText = `https://${url.host}`;
 
         browser.cookies.set({
             url: "https://" + url.host,
             name: settings_name,
-            selector: selector,
-            field : field
+            value : JSON.stringify({ selector: selector.value, field : field.value })
         });
      });
 
 }
 
-function addObjectToTable(url, value, settings) {
+function addObjectToTable(value, settings) {
     let new_node = settings_map[settings].row.cloneNode(true);
     let table = settings_map[settings].table;
 
     console.log(settings);
 
-    new_node.childNodes[1].innerText = url;
+    new_node.childNodes[1].innerText = settings;
     new_node.childNodes[3].innerText = value;
     new_node.removeAttribute('id');
 
