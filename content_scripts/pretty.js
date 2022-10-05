@@ -1,12 +1,10 @@
 browser.runtime.onMessage.addListener(parse);
 
-const EXTRACT_DESTINATION = /JMSDestination=([\w|.\-]{5,})/
 
-async function parse(request, sender, sendResponse) {
+function parse(request, sender, sendResponse) {
     // Execute function when page is loaded and ready
     // let json = document.querySelector(request.selector);
     let payload = document.querySelector(request.selector);
-    let table = document.querySelector('table#messages');
 
     if (payload) {
         if (payload.innerText.startsWith("<")) {
@@ -16,61 +14,6 @@ async function parse(request, sender, sendResponse) {
             stringifyJson(payload);
         }
     }
-
-    if (table && window.location.href.includes('browse.jsp')) {
-        const promises = []
-        for (let i = 0; i < table.children.length; i++) {
-            if (table.children[i].nodeType === Node.ELEMENT_NODE) {
-                let tableChild = table.children[i];
-
-                if (tableChild.localName === 'tbody') {
-                    for (let j = 0; j < tableChild.children.length; j++) {
-                        // we have every row of the table with tableChild.children[j]
-                        let messageId = tableChild.children[j].children[0].firstElementChild.innerHTML;
-                        let destination = EXTRACT_DESTINATION.exec(window.location.href)[1];
-                        // fetch entity id
-                        promises.push(
-                            new Promise((resolve, reject) => {
-                               resolve(fetchField(request.field, messageId, destination))
-                            })
-                            .then((field) => {
-                                setCorelationId(tableChild.children[j].children[1], field)
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            })
-                        );
-                    }
-                }
-            }
-        }
-
-        Promise.all(promises)
-        .then(() => console.log(`Done loading corelationId!`))
-        .catch(() => console.log("There was an error loading corelationId"));
-    }
-}
-
-function setCorelationId(tableChild, value) {
-    tableChild.innerHTML = value;
-}
-
-async function fetchField(fieldName, messageId, destination) {
-    // extract JMSDestination
-    // replace browse.jsp for message.jsp
-    // call message.jsp?id=MESSAGE_ID&JMSDestination=JMS_DESTINATION
-    let url = new URL(window.location.protocol + "//" + window.location.host + `/admin/message.jsp?id=${messageId}&JMSDestination=${destination}`);
-    const response = await fetch(url);
-    const payload = new window.DOMParser().parseFromString(await response.text(), "text/html");
-    // get all td's and parse itterate on them to find entityId
-    return payload.evaluate(`//table[@id=\'properties\']/tbody/tr/td[text() = "${fieldName}"]/following-sibling::td[1]`,
-        payload,
-        null,
-        XPathResult.ANY_TYPE,
-        null)
-    .iterateNext()
-        .innerText;
-    //return value of entityId
 }
 
 // function stringifyJson(request, sender, sendResponse) {
