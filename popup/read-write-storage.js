@@ -48,27 +48,31 @@ function getActiveTab() {
 
 function getUrls() {
     getActiveTab().then((tabs) => {
-        let url = new URL(tabs[0].url);
-        let actual_url = `https://${url.host}`;
+        for (const tab of tabs) {
 
-        // get any previously set cookie for the current tab
-        let gettingCookies = browser.cookies.get({
-            url: actual_url,
-            name: settings_name
-        });
-        gettingCookies.then((cookie) => {
-            if (cookie) {
-                const cookieValue = JSON.parse(cookie.value);
-                addObjectToTable(cookieValue.selector, Settings.SELECTOR);
-                addObjectToTable(cookieValue.field, Settings.FIELD);
-                host.innerText = `https://${url.host}`;
+            let url = new URL(tab.url);
+            let actual_url = `https://${url.host}`;
 
-                selector.value = cookieValue.selector;
-                field.value = cookieValue.field;
+            // get any previously set cookie for the current tab
+            let gettingCookies = browser.cookies.get({
+                url: actual_url,
+                name: settings_name
+            });
 
-                browser.tabs.sendMessage(tabs[0].id, JSON.parse(cookie.value));
-            }
-        });
+            gettingCookies.then((cookie) => {
+                if (cookie) {
+                    const cookieValue = JSON.parse(cookie.value);
+                    addObjectToTable(Settings.SELECTOR, cookieValue.selector);
+                    addObjectToTable(Settings.FIELD, cookieValue.field);
+                    host.innerText = actual_url;
+
+                    selector.value = cookieValue.selector;
+                    field.value = cookieValue.field;
+
+                    browser.tabs.sendMessage(tab.id, cookieValue);
+                }
+            });
+        }
     });
 }
 
@@ -76,10 +80,11 @@ function writeUrl() {
 
     getActiveTab().then((tabs) => {
         let url = new URL(tabs[0].url);
-        browser.tabs.sendMessage(tabs[0].id, { selector: selector.value, field : field.value });
+        browser.tabs.sendMessage(tabs[0].id, { selector: selector.value,
+            field : field.value });
         
-        addObjectToTable(selector.value, Settings.SELECTOR);
-        addObjectToTable(field.value, Settings.FIELD);
+        addObjectToTable(Settings.SELECTOR, selector.value);
+        addObjectToTable(Settings.FIELD, field.value);
         host.innerText = `https://${url.host}`;
 
         browser.cookies.set({
@@ -91,11 +96,9 @@ function writeUrl() {
 
 }
 
-function addObjectToTable(value, settings) {
-    let new_node = settings_map[settings].row.cloneNode(true);
-    let table = settings_map[settings].table;
-
-    console.log(settings);
+function addObjectToTable(settings, value) {
+    const new_node = settings_map[settings].row.cloneNode(true);
+    const table = settings_map[settings].table;
 
     new_node.childNodes[1].innerText = settings;
     new_node.childNodes[3].innerText = value;
